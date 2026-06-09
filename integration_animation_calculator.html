@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integration Animation Calculator</title>
+  <style>
+    /* Modern UI Design & Color Tokens */
+    :root {
+      --bg-gradient-start: #f8fafc;
+      --bg-gradient-end: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --accent-green: #10b981;
+      --accent-green-alpha: rgba(16, 185, 129, 0.25);
+      --accent-red: #ef4444;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header styling */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Main Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 992px) {
+      .grid {
+        grid-template-columns: 450px 1fr;
+      }
+    }
+
+    /* Card Panels */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.75rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Interactive Inputs & Forms */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-addon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 700;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem 0.75rem 0.75rem 1.75rem;
+      border: 1.5px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      background-color: #f8fafc;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: #fff;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    /* Styled math inputs helper label */
+    .math-expr-preview {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 1px dashed var(--border-color);
+      text-align: center;
+      font-size: 1.15rem;
+    }
+
+    /* Control Buttons */
+    .btn-group {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e2e8f0;
+      color: var(--text-primary);
+    }
+
+    /* Visualizer Canvas Area */
+    .canvas-container {
+      position: relative;
+      background: #0f172a; /* Sleek dark theme for the coordinate system */
+      border-radius: 0.75rem;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Interactive Stats Bar overlaying the visualization */
+    .live-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #1e293b;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      font-family: monospace;
+      border: 1px solid #334155;
+    }
+
+    .live-stats span span {
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    /* Mathematical Typography - Clean CSS markup representing formulas beautifully */
+    .math-symbol {
+      font-family: "Times New Roman", Times, serif;
+      font-style: italic;
+    }
+
+    .math-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.35rem;
+      padding: 1.25rem;
+      background: #f8fafc;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    /* Structuring integral limits & fractions dynamically with CSS */
+    .integral-container {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      margin-right: 0.25rem;
+    }
+
+    .integral-sign {
+      font-size: 2.5rem;
+      font-family: "Times New Roman", Times, serif;
+      line-height: 1;
+    }
+
+    .integral-limits {
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      height: 2.5rem;
+      margin-left: -0.25rem;
+      vertical-align: middle;
+    }
+
+    .integral-limits .upper {
+      margin-top: -0.2rem;
+    }
+
+    .integral-limits .lower {
+      margin-bottom: -0.2rem;
+    }
+
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.95em;
+      padding: 0 0.25rem;
+    }
+
+    .fraction .numerator {
+      border-bottom: 1.5px solid var(--text-primary);
+      padding-bottom: 1px;
+    }
+
+    .fraction .denominator {
+      padding-top: 1px;
+    }
+
+    /* Step-by-Step calculus explanation styling */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .step-item {
+      border-left: 3px solid var(--primary);
+      padding-left: 1rem;
+    }
+
+    .step-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .step-content {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .step-math {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 1.15rem;
+      margin-top: 0.5rem;
+      background-color: #f8fafc;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      display: inline-block;
+    }
+
+    .step-math sup {
+      font-size: 0.75rem;
+    }
+
+    /* Alerts and Warnings styling */
+    .alert {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    .success-badge {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>Integration Animation Calculator</h1>
+      <p>Visualize the concept of area accumulation under a quadratic curve and observe the fundamental theorem of calculus step-by-step.</p>
+    </header>
+
+    <div class="grid">
+      <!-- Left Column: Settings and Analytical Solution -->
+      <div class="card">
+        <h2 class="card-title">
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,17H13V11H11V17M11,9H13V7H11V9Z" />
+          </svg>
+          Interactive Inputs
+        </h2>
+
+        <!-- Alert messages -->
+        <div id="validation-alert" class="alert"></div>
+
+        <!-- Quadratic Coefficients ax^2 + bx + c -->
+        <div class="form-group">
+          <label>Coefficients for f(x) = ax² + bx + c</label>
+          <div class="form-row">
+            <div class="input-wrapper">
+              <span class="input-addon">a</span>
+              <input type="number" id="input-a" value="1" step="0.5">
+            </div>
+            <div class="input-wrapper">
+              <span class="input-addon">b</span>
+              <input type="number" id="input-b" value="-5" step="0.5">
+            </div>
+            <div class="input-wrapper">
+              <span class="input-addon">c</span>
+              <input type="number" id="input-c" value="6" step="0.5">
+            </div>
+          </div>
+        </div>
+
+        <!-- Integration Bounds -->
+        <div class="form-group">
+          <label>Definite Integration Bounds</label>
+          <div class="form-row">
+            <div class="input-wrapper">
+              <span class="input-addon" style="left:0.5rem; font-size:0.8rem">Lower (α)</span>
+              <input type="number" id="input-lower" value="4" step="0.5" style="padding-left: 4.2rem;">
+            </div>
+            <div class="input-wrapper" style="grid-column: span 2">
+              <span class="input-addon" style="left:0.5rem; font-size:0.8rem">Upper (β)</span>
+              <input type="number" id="input-upper" value="5" step="0.5" style="padding-left: 4.2rem;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Live formatted math view of input -->
+        <div class="math-expr-preview">
+          <span class="math-symbol">f(x) = </span><span id="formula-text">x² - 5x + 6</span>
+        </div>
+
+        <!-- Interactive Action Controls -->
+        <div class="btn-group">
+          <button class="btn-primary" id="btn-animate">
+            <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+            </svg>
+            Animate Integration
+          </button>
+          <button class="btn-secondary" id="btn-reset">Reset</button>
+        </div>
+
+        <!-- Live Analytical and Mathematical Steps Card Section -->
+        <h2 class="card-title" style="margin-top:1rem">
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M19 19H5V5H19V19M11.5 8H12.5V11H15.5V12H12.5V15H11.5V12H8.5V11H11.5V8Z" />
+          </svg>
+          Analytical Solution Steps
+        </h2>
+
+        <div class="step-list" id="steps-container">
+          <!-- Step items rendered dynamically via Javascript -->
+        </div>
+      </div>
+
+      <!-- Right Column: Visualizer Canvas and Interactive Theorem Display -->
+      <div class="card" style="gap:1.5rem">
+        <h2 class="card-title">
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M16,11.78L20.24,4.45L21.97,5.45L16.74,14.5L14.23,10.22L8.5,19H21V21H3V3H5V18.5L11.5,8.5L14,12.75L16,11.78Z" />
+          </svg>
+          Geometric Visualization
+        </h2>
+
+        <!-- The Canvas viewport with dynamic sizing aspect ratio -->
+        <div class="canvas-container" id="canvas-wrapper">
+          <canvas id="graph-canvas"></canvas>
+        </div>
+
+        <!-- Real-time animation information overlay -->
+        <div class="live-stats">
+          <span>Current Position: <span id="stat-x">0.00</span></span>
+          <span>Accumulated Area: <span id="stat-area">0.00</span></span>
+        </div>
+
+        <!-- Premium math display of the Definite Integral Theorem -->
+        <h2 class="card-title">
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M11,13H13V19H16V21H8V19H11V13M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,10H13V12H11V10M11,6H13V8H11V6Z" />
+          </svg>
+          Mathematical Formulation
+        </h2>
+        <div class="math-display">
+          <span class="math-symbol">Area = </span>
+          <div class="integral-container">
+            <span class="integral-sign">∫</span>
+            <div class="integral-limits">
+              <span class="upper" id="math-upper">β</span>
+              <span class="lower" id="math-lower">α</span>
+            </div>
+          </div>
+          <span class="math-symbol">f(x) dx = F(β) − F(α)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * DOM elements selection
+     */
+    const inputA = document.getElementById('input-a');
+    const inputB = document.getElementById('input-b');
+    const inputC = document.getElementById('input-c');
+    const inputLower = document.getElementById('input-lower');
+    const inputUpper = document.getElementById('input-upper');
+    const btnAnimate = document.getElementById('btn-animate');
+    const btnReset = document.getElementById('btn-reset');
+    const canvas = document.getElementById('graph-canvas');
+    const formulaText = document.getElementById('formula-text');
+    const stepsContainer = document.getElementById('steps-container');
+    const alertBox = document.getElementById('validation-alert');
+
+    // Formulation labels
+    const mathLower = document.getElementById('math-lower');
+    const mathUpper = document.getElementById('math-upper');
+
+    // Live state UI
+    const statX = document.getElementById('stat-x');
+    const statArea = document.getElementById('stat-area');
+
+    const ctx = canvas.getContext('2d');
+
+    /**
+     * Animation State Management
+     */
+    let animationId = null;
+    let isAnimating = false;
+    let currentX = 0; // Tracks the progress x-coordinate through animation
+    let animationSpeed = 0.03; // Units of X traversed per frame
+
+    /**
+     * Global Configuration & Sizing for Plotting Coordinate System
+     */
+    let scaleX, scaleY;
+    let originX, originY;
+    let worldBounds = { minX: -2, maxX: 8, minY: -5, maxY: 15 };
+
+    /**
+     * Core Math Calculations
+     */
+
+    // Computes original function: f(x) = ax² + bx + c
+    function f(x, a, b, c) {
+      return a * x * x + b * x + c;
+    }
+
+    // Analytical Antiderivative evaluation: F(x) = (a/3)x³ + (b/2)x² + cx
+    function F(x, a, b, c) {
+      return (a / 3) * Math.pow(x, 3) + (b / 2) * Math.pow(x, 2) + c * x;
+    }
+
+    // Helper formatting to display floating decimals nicely
+    function formatNum(num, precision = 4) {
+      const parsed = parseFloat(num.toFixed(precision));
+      return isNaN(parsed) ? '0' : parsed.toString();
+    }
+
+    // Formats quadratic equation terms beautifully to show positive/negative signs
+    function formatEquation(a, b, c) {
+      let terms = [];
+      
+      // term for x^2
+      if (a !== 0) {
+        if (a === 1) terms.push("x²");
+        else if (a === -1) terms.push("-x²");
+        else terms.push(`${a}x²`);
+      }
+
+      // term for x
+      if (b !== 0) {
+        let sign = b > 0 ? "+" : "-";
+        let absB = Math.abs(b);
+        let coeff = absB === 1 ? "" : absB;
+        if (terms.length > 0) {
+          terms.push(`${sign} ${coeff}x`);
+        } else {
+          terms.push(`${b}x`);
+        }
+      }
+
+      // constant term
+      if (c !== 0) {
+        let sign = c > 0 ? "+" : "-";
+        let absC = Math.abs(c);
+        if (terms.length > 0) {
+          terms.push(`${sign} ${absC}`);
+        } else {
+          terms.push(`${c}`);
+        }
+      }
+
+      if (terms.length === 0) return "0";
+      return terms.join(" ");
+    }
+
+    /**
+     * Coordinate Mapping Helper Functions
+     */
+    function toCanvasX(x) {
+      return originX + x * scaleX;
+    }
+
+    function toCanvasY(y) {
+      return originY - y * scaleY;
+    }
+
+    /**
+     * Dynamic Grid & Boundaries Solver
+     * Autoscale visible graph boundaries to keep the function & area nicely in frame
+     */
+    function updateCoordinateSystem() {
+      const a = parseFloat(inputA.value) || 0;
+      const b = parseFloat(inputB.value) || 0;
+      const c = parseFloat(inputC.value) || 0;
+      const lower = parseFloat(inputLower.value) || 0;
+      const upper = parseFloat(inputUpper.value) || 0;
+
+      // Ensure lower and upper bounds are within view with a padded offset
+      const minBound = Math.min(lower, upper);
+      const maxBound = Math.max(lower, upper);
+      
+      // Define viewport bounds centered around the area of interest
+      let minX = minBound - 2.5;
+      let maxX = maxBound + 2.5;
+
+      // Safeguard a minimum view interval width to avoid extreme zoom
+      if (maxX - minX < 8) {
+        const center = (minX + maxX) / 2;
+        minX = center - 4;
+        maxX = center + 4;
+      }
+
+      // Sample key points of the function to decide vertical frame range
+      let sampledYValues = [];
+      const samples = 100;
+      const step = (maxX - minX) / samples;
+      for (let i = 0; i <= samples; i++) {
+        const x = minX + i * step;
+        sampledYValues.push(f(x, a, b, c));
+      }
+
+      // Evaluate parabola vertex (turning point) x = -b / (2a)
+      if (a !== 0) {
+        const vertexX = -b / (2 * a);
+        if (vertexX >= minX && vertexX <= maxX) {
+          sampledYValues.push(f(vertexX, a, b, c));
+        }
+      }
+
+      // Add zero baseline so x-axis is almost always within layout context
+      sampledYValues.push(0);
+
+      let minY = Math.min(...sampledYValues);
+      let maxY = Math.max(...sampledYValues);
+
+      // Pad vertical axis
+      const yDiff = maxY - minY;
+      minY = minY - Math.max(0.2 * yDiff, 1.5);
+      maxY = maxY + Math.max(0.2 * yDiff, 1.5);
+
+      worldBounds = { minX, maxX, minY, maxY };
+
+      // Re-establish scale factor conversions
+      scaleX = canvas.width / (worldBounds.maxX - worldBounds.minX);
+      scaleY = canvas.height / (worldBounds.maxY - worldBounds.minY);
+
+      originX = -worldBounds.minX * scaleX;
+      originY = worldBounds.maxY * scaleY;
+    }
+
+    /**
+     * Primary Canvas Drawing Sequence
+     */
+    function draw(shadingEndX = null) {
+      // Clear with sleek dark container background
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const a = parseFloat(inputA.value) || 0;
+      const b = parseFloat(inputB.value) || 0;
+      const c = parseFloat(inputC.value) || 0;
+      const lower = parseFloat(inputLower.value) || 0;
+      const upper = parseFloat(inputUpper.value) || 0;
+
+      // Grid System Tick spacing calculations (adaptive step size)
+      const xRange = worldBounds.maxX - worldBounds.minX;
+      let gridStep = 1;
+      if (xRange > 20) gridStep = 5;
+      if (xRange > 50) gridStep = 10;
+      if (xRange < 4) gridStep = 0.5;
+
+      // Draw Grid Lines (Subtle structure lines)
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      
+      // Vertical grid
+      const startGridX = Math.floor(worldBounds.minX / gridStep) * gridStep;
+      for (let gx = startGridX; gx <= worldBounds.maxX; gx += gridStep) {
+        ctx.beginPath();
+        ctx.moveTo(toCanvasX(gx), 0);
+        ctx.lineTo(toCanvasX(gx), canvas.height);
+        ctx.stroke();
+      }
+
+      // Horizontal grid
+      const yRange = worldBounds.maxY - worldBounds.minY;
+      let gridStepY = 1;
+      if (yRange > 20) gridStepY = 5;
+      if (yRange > 50) gridStepY = 10;
+      if (yRange < 4) gridStepY = 0.5;
+      
+      const startGridY = Math.floor(worldBounds.minY / gridStepY) * gridStepY;
+      for (let gy = startGridY; gy <= worldBounds.maxY; gy += gridStepY) {
+        ctx.beginPath();
+        ctx.moveTo(0, toCanvasY(gy));
+        ctx.lineTo(canvas.width, toCanvasY(gy));
+        ctx.stroke();
+      }
+
+      // Draw Axes Lines (Highlighted coordinate base)
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.5;
+
+      // Y-Axis line
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(0), 0);
+      ctx.lineTo(toCanvasX(0), canvas.height);
+      ctx.stroke();
+
+      // X-Axis line
+      ctx.beginPath();
+      ctx.moveTo(0, toCanvasY(0));
+      ctx.lineTo(canvas.width, toCanvasY(0));
+      ctx.stroke();
+
+      // Label coordinate ticks
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      for (let gx = startGridX; gx <= worldBounds.maxX; gx += gridStep) {
+        if (Math.abs(gx) < 0.0001) continue; // Skip origin label duplication
+        ctx.fillText(formatNum(gx, 1), toCanvasX(gx), toCanvasY(0) + 5);
+      }
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      for (let gy = startGridY; gy <= worldBounds.maxY; gy += gridStepY) {
+        if (Math.abs(gy) < 0.0001) continue;
+        ctx.fillText(formatNum(gy, 1), toCanvasX(0) - 8, toCanvasY(gy));
+      }
+
+      // AREA SHADING ALGORITHM (Animated viewport portion)
+      if (shadingEndX !== null) {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.35)'; // Emerald shader transparency
+        ctx.beginPath();
+
+        // Trace from baseline lower bound to animated maximum bounds
+        const startX = lower;
+        const endX = shadingEndX;
+
+        ctx.moveTo(toCanvasX(startX), toCanvasY(0));
+
+        // Generate tiny trapezoidal segments to fit tight parabola curves smoothly
+        const steps = 150;
+        const dx = (endX - startX) / steps;
+        for (let i = 0; i <= steps; i++) {
+          const x = startX + i * dx;
+          const y = f(x, a, b, c);
+          ctx.lineTo(toCanvasX(x), toCanvasY(y));
+        }
+
+        ctx.lineTo(toCanvasX(endX), toCanvasY(0));
+        ctx.closePath();
+        ctx.fill();
+
+        // Stroke the upper border of the active shading boundary
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const x = startX + i * dx;
+          const y = f(x, a, b, c);
+          if (i === 0) ctx.moveTo(toCanvasX(x), toCanvasY(y));
+          else ctx.lineTo(toCanvasX(x), toCanvasY(y));
+        }
+        ctx.stroke();
+      }
+
+      // Draw original parabola curve f(x)
+      ctx.strokeStyle = '#6366f1'; // Vivid primary purple line
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      const numCurveSteps = 200;
+      const curveDx = (worldBounds.maxX - worldBounds.minX) / numCurveSteps;
+      for (let i = 0; i <= numCurveSteps; i++) {
+        const x = worldBounds.minX + i * curveDx;
+        const y = f(x, a, b, c);
+        if (i === 0) {
+          ctx.moveTo(toCanvasX(x), toCanvasY(y));
+        } else {
+          ctx.lineTo(toCanvasX(x), toCanvasY(y));
+        }
+      }
+      ctx.stroke();
+
+      // Plot reference limits indicator (Dashed Vertical Boundaries)
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = '#ef4444'; // Red dash representation
+      ctx.lineWidth = 1.5;
+
+      // Lower Bound Marker
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(lower), 0);
+      ctx.lineTo(toCanvasX(lower), canvas.height);
+      ctx.stroke();
+
+      // Upper Bound Marker
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(upper), 0);
+      ctx.lineTo(toCanvasX(upper), canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]); // Reset dashed structure
+
+      // Labels on canvas for bounds
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('α = ' + lower, toCanvasX(lower), 15);
+      ctx.fillText('β = ' + upper, toCanvasX(upper), 15);
+    }
+
+    /**
+     * Compute and Display Mathematical Step-by-Step Integrals
+     */
+    function updateCalculusEngine() {
+      const a = parseFloat(inputA.value) || 0;
+      const b = parseFloat(inputB.value) || 0;
+      const c = parseFloat(inputC.value) || 0;
+      const lower = parseFloat(inputLower.value) || 0;
+      const upper = parseFloat(inputUpper.value) || 0;
+
+      // Synchronize live formula headers
+      formulaText.textContent = formatEquation(a, b, c);
+      mathLower.textContent = lower;
+      mathUpper.textContent = upper;
+
+      // Perform calculus computation
+      const f_lower = F(lower, a, b, c);
+      const f_upper = F(upper, a, b, c);
+      const definiteIntegral = f_upper - f_lower;
+
+      // Construct visual text parts for fractional anti-derivatives
+      // Term 1: (a/3)x^3
+      let term1 = "";
+      if (a !== 0) {
+        if (a === 3) term1 = "x³";
+        else if (a === -3) term1 = "-x³";
+        else term1 = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">3</span></span>x³`;
+      }
+      // Term 2: (b/2)x^2
+      let term2 = "";
+      if (b !== 0) {
+        let sign = b > 0 ? "+" : "-";
+        let absB = Math.abs(b);
+        let coeff = absB === 2 ? "" : `<span class="fraction"><span class="numerator">${absB}</span><span class="denominator">2</span></span>`;
+        term2 = ` ${sign} ${coeff}x²`;
+      }
+      // Term 3: cx
+      let term3 = "";
+      if (c !== 0) {
+        let sign = c > 0 ? "+" : "-";
+        let absC = Math.abs(c);
+        term3 = ` ${sign} ${absC}x`;
+      }
+
+      const antiderivativeHTML = `${term1}${term2}${term3} + C`;
+
+      // Build step-by-step documentation
+      stepsContainer.innerHTML = `
+        <!-- Step 1 -->
+        <div class="step-item">
+          <div class="step-title">Step 1: Locate the Indefinite Integral</div>
+          <div class="step-content">
+            Integrate term-by-term using the power rule, <span class="math-symbol">∫ x<sup>n</sup> dx = (x<sup>n+1</sup>)/(n+1)</span>:
+            <div class="step-math">
+              <span class="math-symbol">F(x) = </span> ${antiderivativeHTML}
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-item">
+          <div class="step-title">Step 2: Evaluate at the Upper Bound (β = ${upper})</div>
+          <div class="step-content">
+            Substitute <span class="math-symbol">x = ${upper}</span> into our antiderivative equation:
+            <div class="step-math">
+              <span class="math-symbol">F(${upper}) = </span>
+              ${a !== 0 ? `(${a}/3)(${upper})³` : ''} 
+              ${b !== 0 ? ` + (${b}/2)(${upper})²` : ''} 
+              ${c !== 0 ? ` + (${c})(${upper})` : ''}
+              <br>= <strong>${formatNum(f_upper)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-item">
+          <div class="step-title">Step 3: Evaluate at the Lower Bound (α = ${lower})</div>
+          <div class="step-content">
+            Substitute <span class="math-symbol">x = ${lower}</span> into our antiderivative equation:
+            <div class="step-math">
+              <span class="math-symbol">F(${lower}) = </span>
+              ${a !== 0 ? `(${a}/3)(${lower})³` : ''} 
+              ${b !== 0 ? ` + (${b}/2)(${lower})²` : ''} 
+              ${c !== 0 ? ` + (${c})(${lower})` : ''}
+              <br>= <strong>${formatNum(f_lower)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-item">
+          <div class="step-title">Step 4: Fundamental Theorem Subtraction</div>
+          <div class="step-content">
+            Apply <span class="math-symbol">Area = F(β) − F(α)</span>:
+            <div class="step-math">
+              <span class="math-symbol">Area = ${formatNum(f_upper)} − (${formatNum(f_lower)})</span>
+              <br>= <span class="success-badge">${formatNum(definiteIntegral)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // If not animating, ensure stats show static answers
+      if (!isAnimating) {
+        statX.textContent = formatNum(upper, 2);
+        statArea.textContent = formatNum(definiteIntegral, 4);
+      }
+    }
+
+    /**
+     * Check inputs and validate bounds logic
+     */
+    function validateInputs() {
+      const lower = parseFloat(inputLower.value);
+      const upper = parseFloat(inputUpper.value);
+
+      if (isNaN(lower) || isNaN(upper)) {
+        alertBox.textContent = "Please enter valid numeric boundaries.";
+        alertBox.style.display = "block";
+        return false;
+      }
+
+      if (lower > upper) {
+        alertBox.textContent = "Warning: Lower bound α is greater than upper bound β. The resulting area calculation may yield a negative cumulative sign.";
+        alertBox.style.display = "block";
+        return true; // Mathematical calculation holds true, so proceed
+      }
+
+      alertBox.style.display = "none";
+      return true;
+    }
+
+    /**
+     * Setup Canvas Resolution Handler
+     * Prevents pixelation on High-DPI/Retina screens
+     */
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(1, 1);
+      
+      updateCoordinateSystem();
+      
+      if (!isAnimating) {
+        const upper = parseFloat(inputUpper.value) || 0;
+        draw(upper);
+      }
+    }
+
+    /**
+     * Integral Shading Animation Engine
+     */
+    function animate() {
+      const lower = parseFloat(inputLower.value) || 0;
+      const upper = parseFloat(inputUpper.value) || 0;
+      const a = parseFloat(inputA.value) || 0;
+      const b = parseFloat(inputB.value) || 0;
+      const c = parseFloat(inputC.value) || 0;
+
+      // Handle custom reverse integration bounds elegantly
+      const animTarget = upper;
+      const animStart = lower;
+
+      // Determine horizontal steps
+      if (animStart <= animTarget) {
+        currentX += animationSpeed;
+        if (currentX >= animTarget) {
+          currentX = animTarget;
+          isAnimating = false;
+        }
+      } else {
+        currentX -= animationSpeed;
+        if (currentX <= animTarget) {
+          currentX = animTarget;
+          isAnimating = false;
+        }
+      }
+
+      // Draw dynamic visual frame
+      draw(currentX);
+
+      // Compute intermediate integral values on-the-fly for real-time statistical readouts
+      const currentArea = F(currentX, a, b, c) - F(lower, a, b, c);
+      statX.textContent = formatNum(currentX, 2);
+      statArea.textContent = formatNum(currentArea, 4);
+
+      if (isAnimating) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationId);
+        btnAnimate.innerHTML = `
+          <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+          </svg>
+          Animate Integration
+        `;
+      }
+    }
+
+    /**
+     * Trigger animation sequence from start state
+     */
+    function startAnimation() {
+      if (!validateInputs()) return;
+
+      if (isAnimating) {
+        // Pause active animation
+        isAnimating = false;
+        cancelAnimationFrame(animationId);
+        btnAnimate.innerHTML = `
+          <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+          </svg>
+          Resume Animation
+        `;
+        return;
+      }
+
+      const lower = parseFloat(inputLower.value) || 0;
+      const upper = parseFloat(inputUpper.value) || 0;
+
+      isAnimating = true;
+      btnAnimate.innerHTML = `
+        <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+        </svg>
+        Pause
+      `;
+
+      // Set dynamic speed base relative to the size of the integration bounds
+      animationSpeed = Math.abs(upper - lower) / 150;
+      if (animationSpeed === 0) animationSpeed = 0.01;
+
+      // Start position from left boundary
+      currentX = lower;
+      animate();
+    }
+
+    /**
+     * Synchronize and redraw everything on parameter modifications
+     */
+    function onParameterChange() {
+      if (isAnimating) {
+        isAnimating = false;
+        cancelAnimationFrame(animationId);
+        btnAnimate.innerHTML = `
+          <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+          </svg>
+          Animate Integration
+        `;
+      }
+      validateInputs();
+      updateCoordinateSystem();
+      updateCalculusEngine();
+      const upper = parseFloat(inputUpper.value) || 0;
+      draw(upper);
+    }
+
+    /**
+     * Set up Application Defaults
+     */
+    function resetToDefaults() {
+      if (isAnimating) {
+        isAnimating = false;
+        cancelAnimationFrame(animationId);
+      }
+      
+      // Default equation specified: f(x) = x^2 - 5x + 6, with bounds [4, 5]
+      inputA.value = 1;
+      inputB.value = -5;
+      inputC.value = 6;
+      inputLower.value = 4;
+      inputUpper.value = 5;
+
+      alertBox.style.display = "none";
+      btnAnimate.innerHTML = `
+        <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+        </svg>
+        Animate Integration
+      `;
+
+      updateCoordinateSystem();
+      updateCalculusEngine();
+      draw(parseFloat(inputUpper.value));
+    }
+
+    /**
+     * Event Listeners Bindings
+     */
+    btnAnimate.addEventListener('click', startAnimation);
+    btnReset.addEventListener('click', resetToDefaults);
+
+    [inputA, inputB, inputC, inputLower, inputUpper].forEach(input => {
+      input.addEventListener('input', onParameterChange);
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // Initial load initializer sequence
+    window.onload = function() {
+      resizeCanvas();
+      resetToDefaults();
+    };
+  </script>
+</body>
+</html>
